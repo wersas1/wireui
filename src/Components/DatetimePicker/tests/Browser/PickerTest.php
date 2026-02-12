@@ -210,6 +210,39 @@ class PickerTest extends BrowserTestCase
             ->toggleWrapper()
             ->waitForWrapperValue('11-12-2021 20:44');
     }
+
+    public function test_it_should_select_date_and_time_when_using_blur(): void
+    {
+        Livewire::visit(new class extends Component
+        {
+            public $model = '2021-12-25T00:00:00';
+
+            public function render(): string
+            {
+                return <<<'BLADE'
+                <div>
+                    <x-badge dusk="model" :label="$model" />
+
+                    <x-datetime-picker
+                        wire:model.blur="model"
+                        label="Date and Time"
+                        without-timezone
+                        display-format="DD-MM-YYYY HH:mm"
+                    />
+                </div>
+                BLADE;
+            }
+        })
+            ->assertInputValue('model', '2021-12-25 00:00:00')
+            ->toggleWrapper()
+            ->tap(fn (Browser $browser) => $browser->selectDate('model', 11))
+            ->waitForTextIn('@model', '2021-12-11 00:00:00')
+            ->downTimePicker('hours', 4)
+            ->downTimePicker('minutes', 16)
+            ->downTimePicker('seconds', 21)
+            ->assertInputValue('model', '2021-12-11 08:44:39')
+            ->downTimePicker('period', 1)
+            ->assertInputValue('model', '2021-12-11 20:44:39')
             ->toggleWrapper()
             ->waitForWrapperValue('11-12-2021 20:44');
     }
